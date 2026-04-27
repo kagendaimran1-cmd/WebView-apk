@@ -1,7 +1,8 @@
 name: Build APK
 
 on:
-  push:
+  repository_dispatch:
+    types: [build-apk]
 
 jobs:
   build:
@@ -16,6 +17,9 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+
+      - name: Show incoming URL
+        run: echo "Building APK for URL: ${{ github.event.client_payload.url }}"
 
       - name: Grant execute permission
         run: chmod +x gradlew
