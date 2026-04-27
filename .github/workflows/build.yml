@@ -1,8 +1,8 @@
 name: Build APK
 
 on:
-  repository_dispatch:
-    types: [build-apk]
+  push:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -18,17 +18,17 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Show incoming URL
-        run: echo "Building APK for URL: ${{ github.event.client_payload.url }}"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
 
-      - name: Grant execute permission
+      - name: Grant permission
         run: chmod +x gradlew
 
-      - name: Build APK
+      - name: Build Release APK
         run: ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: app/build/outputs/apk/release/
+          path: app/build/outputs/apk/release/*.apk
