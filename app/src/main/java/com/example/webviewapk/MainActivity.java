@@ -11,7 +11,7 @@ public class MainActivity extends Activity {
 
         WebView webView = new WebView(this);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl("https://google.com");
+        webView.loadUrl("https://backend-apk-builder.onrender.com");
 
         setContentView(webView);
     }
