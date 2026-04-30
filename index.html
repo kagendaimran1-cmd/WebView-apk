@@ -2,32 +2,66 @@
 <html>
 <head>
     <title>APK Builder Pro</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+        input {
+            width: 300px;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        #status {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        #downloadLink {
+            display: none;
+            margin-top: 15px;
+            display: inline-block;
+            padding: 10px;
+            background: green;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
 
 <h2>Create Your Android App</h2>
 
-<input type="text" id="name" placeholder="App Name"><br><br>
+<input type="text" id="name" placeholder="App Name"><br>
 <input type="text" id="url" placeholder="Website URL"><br><br>
 
 <button onclick="build()">Generate APK</button>
 
 <p id="status"></p>
 
-<a id="downloadLink" href="#" target="_blank" style="display:none;">
+<a id="downloadLink" href="#" target="_blank">
     Download Your APK
 </a>
+
 <script>
 function build() {
-    const url = document.getElementById("url").value;
-    const name = document.getElementById("name") ? document.getElementById("name").value : "MyApp";
+    const url = document.getElementById("url").value.trim();
+    const name = document.getElementById("name").value.trim() || "MyApp";
+
+    const status = document.getElementById("status");
+    const link = document.getElementById("downloadLink");
+
+    link.style.display = "none";
 
     if (!url) {
-        document.getElementById("status").innerText = "Please enter a URL";
+        status.innerText = "⚠️ Please enter a URL";
         return;
     }
 
-    document.getElementById("status").innerText = "Building APK...";
+    status.innerText = "⏳ Building APK... Please wait";
 
     fetch("https://apk-builder-backend.onrender.com/build", {
         method: "POST",
@@ -39,19 +73,24 @@ function build() {
             name: name
         })
     })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("status").innerText = data.message;
+    .then(async res => {
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || "Build failed");
+        }
+
+        status.innerText = "✅ " + data.message;
 
         if (data.download) {
-            const link = document.getElementById("downloadLink");
             link.href = data.download;
-            link.style.display = "block";
+            link.style.display = "inline-block";
+            link.innerText = "⬇ Download Your APK";
         }
     })
     .catch(err => {
-        document.getElementById("status").innerText = "Error connecting to backend";
-        console.log(err);
+        status.innerText = "❌ Error connecting to backend";
+        console.error(err);
     });
 }
 </script>
