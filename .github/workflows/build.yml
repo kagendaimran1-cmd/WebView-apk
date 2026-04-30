@@ -1,12 +1,44 @@
-- name: Rename APK
-  run: |
-    mkdir output
-    cp app/build/outputs/apk/debug/app-debug.apk output/app-${{ github.run_id }}.apk
+name: Build APK
 
-- name: Upload APK to Release
-  uses: softprops/action-gh-release@v2
-  with:
-    tag_name: latest
-    files: output/app-${{ github.run_id }}.apk
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant permission
+        run: chmod +x gradlew
+
+      - name: Build APK
+        run: ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: |
+          mkdir output
+          cp app/build/outputs/apk/debug/app-debug.apk output/app-${{ github.run_id }}.apk
+
+      - name: Upload APK to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          files: output/app-${{ github.run_id }}.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
