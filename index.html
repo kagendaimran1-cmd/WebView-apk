@@ -2,28 +2,24 @@
 <html>
 <head>
     <title>APK Builder</title>
-    <style>
-        body { font-family: Arial; text-align: center; margin-top: 50px; }
-        input { padding: 10px; width: 300px; }
-        button { padding: 10px 20px; margin-top: 10px; }
-        #result { margin-top: 20px; }
-    </style>
 </head>
 <body>
 
 <h2>Create Your App</h2>
 
 <input type="text" id="url" placeholder="Enter your website URL">
-<br>
 <button onclick="build()">Generate APK</button>
 
-<div id="result"></div>
+<p id="status"></p>
+<a id="downloadLink" href="#" target="_blank" style="display:none;">
+    Download APK
+</a>
 
 <script>
 function build() {
     const url = document.getElementById("url").value;
 
-    document.getElementById("result").innerHTML = "Building APK... wait 1–2 minutes";
+    document.getElementById("status").innerText = "Building APK... please wait";
 
     fetch("https://apk-builder-backend.onrender.com/build", {
         method: "POST",
@@ -34,12 +30,16 @@ function build() {
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById("result").innerHTML = `
-            <p>${data.message}</p>
-            <a href="${data.download}" target="_blank">
-                Download APK
-            </a>
-        `;
+        document.getElementById("status").innerText = data.message;
+
+        if (data.download) {
+            const link = document.getElementById("downloadLink");
+            link.href = data.download;
+            link.style.display = "block";
+        }
+    })
+    .catch(err => {
+        document.getElementById("status").innerText = "Error building APK";
     });
 }
 </script>
