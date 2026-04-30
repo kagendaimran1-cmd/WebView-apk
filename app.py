@@ -9,32 +9,38 @@ def home():
 
 @app.route('/build', methods=['POST'])
 def build_apk():
-    url = request.json.get('url')
+    data = request.json
+    url = data.get('url')
 
     if not url:
         return jsonify({"error": "No URL provided"}), 400
 
-    # Path to your Android project
-    file_path = "WebView-apk/app/src/main/java/com/example/webviewapk/MainActivity.java"
+    file_path = "app/src/main/java/com/example/webviewapk/MainActivity.java"
 
-    # Replace URL inside Java file
-    with open(file_path, "r") as f:
-        content = f.read()
+    try:
+        with open(file_path, "r") as f:
+            content = f.read()
 
-    new_content = content.replace(
-        'webView.loadUrl("https://backend-apk-builder.onrender.com");',
-        f'webView.loadUrl("{url}");'
-    )
+        new_content = content.replace(
+            'webView.loadUrl("https://backend-apk-builder.onrender.com");',
+            f'webView.loadUrl("{url}");'
+        )
 
-    with open(file_path, "w") as f:
-        f.write(new_content)
+        with open(file_path, "w") as f:
+            f.write(new_content)
 
-    # Push to GitHub
-    os.system("git add .")
-    os.system(f'git commit -m "Build APK for {url}"')
-    os.system("git push")
+        os.system("git add .")
+        os.system(f'git commit -m "Build APK for {url}"')
+        os.system("git push")
 
-    return jsonify({"message": "Build started!"})
+        return jsonify({
+            "message": "Build started!",
+            "download": "https://github.com/kagendaimran1-cmd/WebView-apk/actions"
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0", port=10000)

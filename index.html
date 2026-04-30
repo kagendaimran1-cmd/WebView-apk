@@ -7,14 +7,19 @@
 
 <h2>Create Your App</h2>
 
-<input type="text" id="url" placeholder="Enter>
+<input type="text" id="url" placeholder="Enter website URL" />
 <button onclick="build()">Generate APK</button>
+
+<p id="status"></p>
+<p id="result"></p>
 
 <script>
 function build() {
-    const url = document.getElementById("url")>
+    const url = document.getElementById("url").value;
 
-    fetch("https://backend-apk-builder.onrende>
+    document.getElementById("status").innerText = "Sending request...";
+
+    fetch("https://apk-builder-backend.onrender.com/build", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -22,8 +27,20 @@ function build() {
         body: JSON.stringify({ url: url })
     })
     .then(res => res.json())
-    .then(data => alert(data.message));
+    .then(data => {
+        document.getElementById("status").innerText = data.message || "Done";
+
+        if (data.download) {
+            document.getElementById("result").innerHTML =
+                `<a href="${data.download}" target="_blank">Download APK</a>`;
+        }
+    })
+    .catch(err => {
+        document.getElementById("status").innerText = "Error";
+        console.log(err);
+    });
 }
 </script>
 
 </body>
+</html>
