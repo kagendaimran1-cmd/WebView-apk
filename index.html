@@ -17,13 +17,17 @@
 <a id="downloadLink" href="#" target="_blank" style="display:none;">
     Download Your APK
 </a>
-
 <script>
 function build() {
-    const name = document.getElementById("name").value;
     const url = document.getElementById("url").value;
+    const name = document.getElementById("name") ? document.getElementById("name").value : "MyApp";
 
-    document.getElementById("status").innerText = "Building your app...";
+    if (!url) {
+        document.getElementById("status").innerText = "Please enter a URL";
+        return;
+    }
+
+    document.getElementById("status").innerText = "Building APK...";
 
     fetch("https://apk-builder-backend.onrender.com/build", {
         method: "POST",
@@ -31,21 +35,23 @@ function build() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            name: name,
-            url: url
+            url: url,
+            name: name
         })
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById("status").innerText =
-            "App ID: " + data.app_id + " (Wait ~1 min)";
+        document.getElementById("status").innerText = data.message;
 
-        const link = document.getElementById("downloadLink");
-        link.href = data.download;
-        link.style.display = "block";
+        if (data.download) {
+            const link = document.getElementById("downloadLink");
+            link.href = data.download;
+            link.style.display = "block";
+        }
     })
-    .catch(() => {
-        document.getElementById("status").innerText = "Error building APK";
+    .catch(err => {
+        document.getElementById("status").innerText = "Error connecting to backend";
+        console.log(err);
     });
 }
 </script>
