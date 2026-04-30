@@ -1,73 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>APK Builder Pro</title>
+    <title>APK Builder</title>
     <style>
-        body {
-            font-family: Arial;
-            background: #0f172a;
-            color: white;
-            text-align: center;
-            padding: 40px;
-        }
-
-        input {
-            width: 80%;
-            padding: 12px;
-            margin: 10px;
-            border-radius: 8px;
-            border: none;
-        }
-
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            background: #22c55e;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #16a34a;
-        }
-
-        .box {
-            margin-top: 20px;
-            padding: 15px;
-            background: #1e293b;
-            border-radius: 10px;
-            width: 80%;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        a {
-            color: #38bdf8;
-        }
+        body { font-family: Arial; text-align: center; margin-top: 50px; }
+        input { padding: 10px; width: 300px; }
+        button { padding: 10px 20px; margin-top: 10px; }
+        #result { margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<h1>🚀 APK Builder Pro</h1>
+<h2>Create Your App</h2>
 
-<p>Enter website URL to generate APK</p>
-
-<input type="text" id="url" placeholder="https://example.com" />
+<input type="text" id="url" placeholder="Enter your website URL">
 <br>
 <button onclick="build()">Generate APK</button>
 
-<div class="box">
-    <p id="status">Status: Waiting...</p>
-    <p id="download"></p>
-</div>
+<div id="result"></div>
 
 <script>
 function build() {
     const url = document.getElementById("url").value;
 
-    document.getElementById("status").innerText = "Building APK...";
+    document.getElementById("result").innerHTML = "Building APK... wait 1–2 minutes";
 
     fetch("https://apk-builder-backend.onrender.com/build", {
         method: "POST",
@@ -78,15 +34,12 @@ function build() {
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById("status").innerText = data.message;
-
-        if (data.download) {
-            document.getElementById("download").innerHTML =
-                `<a href="${data.download}" target="_blank">📥 Download APK</a>`;
-        }
-    })
-    .catch(err => {
-        document.getElementById("status").innerText = "Error occurred";
+        document.getElementById("result").innerHTML = `
+            <p>${data.message}</p>
+            <a href="${data.download}" target="_blank">
+                Download APK
+            </a>
+        `;
     });
 }
 </script>
