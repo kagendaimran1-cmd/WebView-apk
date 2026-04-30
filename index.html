@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>APK Builder</title>
+</head>
+<body>
+
+<h2>Create Your App</h2>
+
+<input type="text" id="url" placeholder="Enter your website URL">
+<button onclick="build()">Generate APK</button>
+
+<script>
+function build() {
+    const url = document.getElementById("url").value;
+
+    fetch("https://backend-apk-builder.onrender.com/build", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url: url })
+    })
+    .then(res => res.json())
+    .then(data => alert(data.message));
+}
+</script>
+
+</body>
+</html>
