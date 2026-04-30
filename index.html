@@ -1,23 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>APK Builder</title>
+    <title>APK Builder Pro</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            margin: 10px;
+            border-radius: 8px;
+            border: none;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #22c55e;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #16a34a;
+        }
+
+        .box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #1e293b;
+            border-radius: 10px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        a {
+            color: #38bdf8;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Create Your App</h2>
+<h1>🚀 APK Builder Pro</h1>
 
-<input type="text" id="url" placeholder="Enter website URL" />
+<p>Enter website URL to generate APK</p>
+
+<input type="text" id="url" placeholder="https://example.com" />
+<br>
 <button onclick="build()">Generate APK</button>
 
-<p id="status"></p>
-<p id="result"></p>
+<div class="box">
+    <p id="status">Status: Waiting...</p>
+    <p id="download"></p>
+</div>
 
 <script>
 function build() {
     const url = document.getElementById("url").value;
 
-    document.getElementById("status").innerText = "Sending request...";
+    document.getElementById("status").innerText = "Building APK...";
 
     fetch("https://apk-builder-backend.onrender.com/build", {
         method: "POST",
@@ -28,16 +78,15 @@ function build() {
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById("status").innerText = data.message || "Done";
+        document.getElementById("status").innerText = data.message;
 
         if (data.download) {
-            document.getElementById("result").innerHTML =
-                `<a href="${data.download}" target="_blank">Download APK</a>`;
+            document.getElementById("download").innerHTML =
+                `<a href="${data.download}" target="_blank">📥 Download APK</a>`;
         }
     })
     .catch(err => {
-        document.getElementById("status").innerText = "Error";
-        console.log(err);
+        document.getElementById("status").innerText = "Error occurred";
     });
 }
 </script>
