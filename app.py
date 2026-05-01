@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import os
 import uuid
 
 app = Flask(__name__)
+CORS(app)  # 🔥 THIS FIXES YOUR ERROR
 
 @app.route('/')
 def home():
@@ -10,51 +12,54 @@ def home():
 
 @app.route('/build', methods=['POST'])
 def build_apk():
-    data = request.json
+    try:
+        data = request.get_json()
 
-    url = data.get('url')
-    app_name = data.get('name', 'MyApp')
+        if not data:
+            return jsonify({"error": "No data received"}), 400
 
-    if not url:
-        return jsonify({"error": "No URL provided"}), 400
+        url = data.get('url')
+        app_name = data.get('name', 'MyApp')
 
-    # 🔥 Unique ID for each app
-    app_id = str(uuid.uuid4())[:8]
+        if not url:
+            return jsonify({"error": "No URL provided"}), 400
 
-    java_file = "app/src/main/java/com/example/webviewapk/MainActivity.java"
+        app_id = str(uuid.uuid4())[:8]
 
-    with open(java_file, "r") as f:
-        content = f.read()
+        java_file = "app/src/main/java/com/example/webviewapk/MainActivity.java"
 
-    # Replace URL
-    content = content.replace(
-        'webView.loadUrl("https://example.com");',
-        f'webView.loadUrl("{url}");'
-    )
+        with open(java_file, "r") as f:
+            content = f.read()
 
-    # Replace app name (optional if added in strings.xml)
-    content = content.replace("MyApp", app_name)
+        content = content.replace(
+            'webView.loadUrl("https://example.com");',
+            f'webView.loadUrl("{url}");'
+        )
 
-    with open(java_file, "w") as f:
-        f.write(content)
+        content = content.replace("MyApp", app_name)
 
-    # Save app info (optional tracking)
-    with open("apps.json", "a") as f:
-        f.write(f"{app_id} - {app_name} - {url}\n")
+        with open(java_file, "w") as f:
+            f.write(content)
 
-    # Commit & push → triggers build
-    os.system("git add .")
-    os.system(f'git commit -m "Build {app_name} ({app_id})"')
-    os.system("git push")
+        with open("apps.json", "a") as f:
+            f.write(f"{app_id} - {app_name} - {url}\n")
 
-    # 🔥 Unique download link
-    download_link = f"https://github.com/kagendaimran1-cmd/WebView-apk/releases/download/latest/app-debug.apk"
+        # Trigger GitHub Actions
+        os.system("git add .")
+        os.system(f'git commit -m "Build {app_name} ({app_id})"')
+        os.system("git push")
 
-    return jsonify({
-        "message": "Your APK is being built...",
-        "app_id": app_id,
-        "download": download_link
-    })
+        download_link = "https://github.com/kagendaimran1-cmd/WebView-apk/releases/download/latest/app-debug.apk"
+
+        return jsonify({
+            "message": "Your APK is being built...",
+            "app_id": app_id,
+            "download": download_link
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run()
